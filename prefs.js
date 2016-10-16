@@ -12,7 +12,7 @@ const TOKEN_EXPLAINER = 'To get your token, please visit <a href="https://github
 						' - Pick any name you fancy (Gnome desktop notifications)\n' +
 						' - Select the "Notifications" scope\n' +
 						' - Click on "Generate Token"\n' +
-						' - Copy and paste the token in the above field"';
+						' - Copy and paste the token in the above field';
 
 function buildPrefsWidget() {
 	const settings = Convenience.getSettings(GITHUB_SETTINGS_SCHEMA);
