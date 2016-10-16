@@ -1,0 +1,14 @@
+<schemalist gettext-domain="gnome-shell-extension-github-notifications">
+
+  <schema id="org.gnome.shell.extensions.github.notifications" path="/org/gnome/shell/extensions/github-notifications/">
+  	<key name="handle" type="s">
+  		<default>''</default>
+  		<summary>Your github handle</summary>
+  	</key>
+  	<key name="token" type="s">
+  		<default>''</default>
+  		<summary>Your github token</summary>
+  		<description>To get you token go to https://github.com/settings/tokens and create a token, making sure you authorize it to access your notifications</description>
+  	</key>
+  </schema>
+</schemalist>
