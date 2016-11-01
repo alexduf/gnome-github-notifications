@@ -28,7 +28,6 @@ function error(message) {
 
 const GithubNotifications = new Lang.Class({
   Name: 'GithubNotifications',
-  Extends: GObject.Object,
 
   token: '',
   handle: '',
