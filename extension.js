@@ -100,7 +100,7 @@ const GithubNotifications = new Lang.Class({
     this.box.add_actor(icon);
     this.box.add_actor(this.label);
     this.box.connect('button-press-event', function() {
-      Gtk.show_uri(null, 'https://github.com/notifications', new Date().getTime()/1000);
+      Gtk.show_uri(null, 'https://github.com/notifications', Gtk.get_current_event_time());
     });
   },
 
