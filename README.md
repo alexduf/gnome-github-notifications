@@ -5,6 +5,7 @@ Integrate github's notifications within the gnome desktop environment
 
 ### The automatic way
 Go there and activate the extension: https://extensions.gnome.org/extension/1125/github-notifications/
+Don't forget to click on the configuration icon and follow the instructions there.
 
 ### The manual way
 
