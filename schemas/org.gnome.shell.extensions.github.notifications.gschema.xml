@@ -5,10 +5,18 @@
   		<default>''</default>
   		<summary>Your github handle</summary>
   	</key>
-  	<key name="token" type="s">
-  		<default>''</default>
-  		<summary>Your github token</summary>
-  		<description>To get you token go to https://github.com/settings/tokens and create a token, making sure you authorize it to access your notifications</description>
-  	</key>
+    <key name="token" type="s">
+      <default>''</default>
+      <summary>Your github token</summary>
+      <description>To get you token go to https://github.com/settings/tokens and create a token, making sure you authorize it to access your notifications</description>
+    </key>
+    <key name="hide-widget" type="b">
+      <default>false</default>
+      <summary>Hide widget when there are no notifications</summary>
+    </key>
+    <key name="hide-notification-count" type="b">
+      <default>false</default>
+      <summary>Hide notification count</summary>
+    </key>
   </schema>
 </schemalist>
