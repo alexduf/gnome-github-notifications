@@ -18,5 +18,10 @@
       <default>false</default>
       <summary>Hide notification count</summary>
     </key>
+    <key name="refresh-interval" type="i">
+      <default>60</default>
+      <summary>The refresh interval in seconds</summary>
+      <description>The refresh interval used by the extension. If this number is smaller than the header returned by github, it will be ignored and the header will take precedence. See https://developer.github.com/v3/activity/notifications/</description>
+    </key>
   </schema>
 </schemalist>

@@ -31,13 +31,20 @@ const GithubNotifications = new Lang.Class({
 
   token: '',
   handle: '',
-  interval: 60,
+  hideWidget: false,
+  hideCount: false,
+  refreshInterval: 60,
+  githubInterval: 60,
   timeout: null,
   httpSession: null,
   notifications: [],
   lastModified: null,
   retryAttempts: 0,
   hasLazilyInit: false,
+
+  interval: function() {
+    return Math.max(this.refreshInterval, this.githubInterval);
+  },
  
   _init : function() {
     this.parent();
@@ -51,7 +58,7 @@ const GithubNotifications = new Lang.Class({
       this.reloadSettings();
       this.initHttp();
       this.stopLoop();
-      this.planFetch(10, false);
+      this.planFetch(5, false);
     }));
     this.initUI();
   },
@@ -72,6 +79,15 @@ const GithubNotifications = new Lang.Class({
   reloadSettings: function() {
     this.token = Settings.get_string('token');
     this.handle = Settings.get_string('handle');
+    this.hideWidget = Settings.get_boolean('hide-widget');
+    this.hideCount = Settings.get_boolean('hide-notification-count');
+    this.refreshInterval = Settings.get_int('refresh-interval');
+    if (this.box) {
+      this.box.visible = (!this.hideWidget || this.label.text != '0');
+    }
+    if (this.label) {
+      this.label.visible = !this.hideCount;
+    }
   },
 
   stopLoop: function() {
@@ -86,12 +102,14 @@ const GithubNotifications = new Lang.Class({
       style_class: 'panel-button',
       reactive: true,
       can_focus: true,
-      track_hover: true
+      track_hover: true,
+      visible: (!this.hideWidget || this.label.text != '0')
     });
     this.label = new St.Label({
       text: '' + this.notifications.length,
       style_class: 'system-status-icon',
-      y_align: Clutter.ActorAlign.CENTER
+      y_align: Clutter.ActorAlign.CENTER,
+      visible: !this.hideCount
     });
 
     let icon = new St.Icon({ style_class: 'system-status-icon github-background-symbolic' });
@@ -152,9 +170,9 @@ const GithubNotifications = new Lang.Class({
               this.lastModified = response.response_headers.get('Last-Modified');
             }
             if (response.response_headers.get('X-Poll-Interval')) {
-              this.interval = response.response_headers.get('X-Poll-Interval');
+              this.githubInterval = response.response_headers.get('X-Poll-Interval');
             }
-            this.planFetch(this.interval, false);
+            this.planFetch(this.interval(), false);
           }
           if (response.status_code == 200) {
             let data = JSON.parse(response.response_body.data);
@@ -163,13 +181,13 @@ const GithubNotifications = new Lang.Class({
           }
           if (response.status_code == 401) {
             error('Unauthorized. Check your github handle and token in the settings');
-            this.planFetch(this.interval, true);
+            this.planFetch(this.interval(), true);
             this.label.set_text('!');
             return;
           }
           if (!response.response_body.data && response.status_code > 400) {
             error('HTTP error:' + response.status_code);
-            this.planFetch(this.interval, true);
+            this.planFetch(this.interval(), true);
             return;
           }
         } catch (e) {
