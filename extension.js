@@ -82,8 +82,11 @@ const GithubNotifications = new Lang.Class({
     this.hideWidget = Settings.get_boolean('hide-widget');
     this.hideCount = Settings.get_boolean('hide-notification-count');
     this.refreshInterval = Settings.get_int('refresh-interval');
+  },
+
+  checkVisibility: function() {
     if (this.box) {
-      this.box.visible = (!this.hideWidget || this.label.text != '0');
+      this.box.visible = !this.hideWidget || this.notifications.length != 0;
     }
     if (this.label) {
       this.label.visible = !this.hideCount;
@@ -102,15 +105,15 @@ const GithubNotifications = new Lang.Class({
       style_class: 'panel-button',
       reactive: true,
       can_focus: true,
-      track_hover: true,
-      visible: (!this.hideWidget || this.label.text != '0')
+      track_hover: true
     });
     this.label = new St.Label({
       text: '' + this.notifications.length,
       style_class: 'system-status-icon',
-      y_align: Clutter.ActorAlign.CENTER,
-      visible: !this.hideCount
+      y_align: Clutter.ActorAlign.CENTER
     });
+
+    this.checkVisibility();
 
     let icon = new St.Icon({ style_class: 'system-status-icon github-background-symbolic' });
 
@@ -199,7 +202,8 @@ const GithubNotifications = new Lang.Class({
 
   updateNotifications: function(data) {
     this.notifications = data;
-    this.label.set_text('' + data.length);
+    this.label && this.label.set_text('' + data.length);
+    this.checkVisibility();
   }
 });
 
