@@ -33,7 +33,7 @@ function buildPrefsWidget() {
 	const hideCountLabel = new Gtk.Label ({label : "Hide notification count"});
 	hideCount.pack_start(hideCountLabel, false, false, 5);
 	const hideCountSwitch = new Gtk.Switch();
-	settings.bind('hide-notification-count', hideCountSwitch, 'value', Gio.SettingsBindFlags.DEFAULT);
+	settings.bind('hide-notification-count', hideCountSwitch, 'state', Gio.SettingsBindFlags.DEFAULT);
 	hideCount.pack_end(hideCountSwitch, false, false, 5);
 	box.pack_start(hideCount, false, false, 5);
 
