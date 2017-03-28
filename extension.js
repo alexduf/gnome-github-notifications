@@ -82,6 +82,7 @@ const GithubNotifications = new Lang.Class({
     this.hideWidget = Settings.get_boolean('hide-widget');
     this.hideCount = Settings.get_boolean('hide-notification-count');
     this.refreshInterval = Settings.get_int('refresh-interval');
+    this.checkVisibility();
   },
 
   checkVisibility: function() {
