@@ -13,6 +13,7 @@ const Clutter = imports.gi.Clutter;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
+const Util = imports.misc.util;
 
 const GITHUB_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.github.notifications';
 const Settings = Convenience.getSettings(GITHUB_SETTINGS_SCHEMA);
@@ -45,7 +46,7 @@ const GithubNotifications = new Lang.Class({
   interval: function() {
     return Math.max(this.refreshInterval, this.githubInterval);
   },
- 
+
   _init : function() {
     this.parent();
   },
@@ -120,8 +121,14 @@ const GithubNotifications = new Lang.Class({
 
     this.box.add_actor(icon);
     this.box.add_actor(this.label);
-    this.box.connect('button-press-event', function() {
-      Gtk.show_uri(null, 'https://github.com/notifications', Gtk.get_current_event_time());
+    this.box.connect('button-press-event', function(actor, event) {
+      let button = event.get_button();
+
+      if (button == 1) {
+        Gtk.show_uri(null, 'https://github.com/notifications', Gtk.get_current_event_time());
+      } else if (button == 3) {
+        Util.spawn(["gnome-shell-extension-prefs", "github.notifications@alexandre.dufournet.gmail.com"]);
+      }
     });
   },
 
