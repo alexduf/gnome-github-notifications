@@ -184,10 +184,10 @@ const GithubNotifications = new Lang.Class({
               this.githubInterval = response.response_headers.get('X-Poll-Interval');
             }
             this.planFetch(this.interval(), false);
-          }
-          if (response.status_code == 200) {
-            let data = JSON.parse(response.response_body.data);
-            this.updateNotifications(data);
+            if (response.status_code == 200) {
+              let data = JSON.parse(response.response_body.data);
+              this.updateNotifications(data);
+            }
             return;
           }
           if (response.status_code == 401) {
@@ -201,6 +201,14 @@ const GithubNotifications = new Lang.Class({
             this.planFetch(this.interval(), true);
             return;
           }
+          // if we reach this point, none of the cases above have been triggered
+          // which likely means there was an error locally or on the network
+          // therefore we should try again in a while
+          error('HTTP error:' + response.status_code);
+          error('response error: ' + JSON.stringify(response));
+          this.planFetch(this.interval(), true);
+          this.label.set_text('!');
+          return;
         } catch (e) {
           error('HTTP exception:' + e);
           return;
