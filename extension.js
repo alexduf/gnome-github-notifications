@@ -41,10 +41,16 @@ const GithubNotifications = new Lang.Class({
   notifications: [],
   lastModified: null,
   retryAttempts: 0,
+  retryIntervals: [60, 120, 240, 480, 960, 1920, 3600],
   hasLazilyInit: false,
 
   interval: function() {
-    return Math.max(this.refreshInterval, this.githubInterval);
+    if (retryAttempts > 0) {
+      let i = retryIntervals[retryAttempts] || 3600;
+    } else {
+      let i = this.refreshInterval
+    }
+    return Math.max(i, this.githubInterval);
   },
 
   _init : function() {
@@ -157,13 +163,11 @@ const GithubNotifications = new Lang.Class({
     } else {
       this.retryAttempts = 0;
     }
-    if (this.retryAttempts < 6) {
-      this.stopLoop();
-      this.timeout = Mainloop.timeout_add_seconds(delay, Lang.bind(this, function() {
-        this.fetchNotifications();
-        return false;
-      }));
-    }
+    this.stopLoop();
+    this.timeout = Mainloop.timeout_add_seconds(delay, Lang.bind(this, function() {
+      this.fetchNotifications();
+      return false;
+    }));
   },
 
   fetchNotifications: function() {
