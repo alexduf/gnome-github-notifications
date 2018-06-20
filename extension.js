@@ -45,10 +45,9 @@ const GithubNotifications = new Lang.Class({
   hasLazilyInit: false,
 
   interval: function() {
-    if (retryAttempts > 0) {
-      let i = retryIntervals[retryAttempts] || 3600;
-    } else {
-      let i = this.refreshInterval
+    let i = this.refreshInterval
+    if (this.retryAttempts > 0) {
+      i = this.retryIntervals[this.retryAttempts] || 3600;
     }
     return Math.max(i, this.githubInterval);
   },
