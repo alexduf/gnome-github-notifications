@@ -43,6 +43,7 @@ const GithubNotifications = new Lang.Class({
   retryAttempts: 0,
   retryIntervals: [60, 120, 240, 480, 960, 1920, 3600],
   hasLazilyInit: false,
+  showAlertNotification: false,
 
   interval: function() {
     let i = this.refreshInterval
@@ -88,6 +89,7 @@ const GithubNotifications = new Lang.Class({
     this.hideWidget = Settings.get_boolean('hide-widget');
     this.hideCount = Settings.get_boolean('hide-notification-count');
     this.refreshInterval = Settings.get_int('refresh-interval');
+    this.showAlertNotification = Settings.get_boolean('show-alert');
     this.checkVisibility();
   },
 
@@ -220,9 +222,26 @@ const GithubNotifications = new Lang.Class({
   },
 
   updateNotifications: function(data) {
+    let lastNotificationsCount = this.notifications.length;
+
     this.notifications = data;
     this.label && this.label.set_text('' + data.length);
     this.checkVisibility();
+    this.alertWithNotifications(lastNotificationsCount);
+  },
+
+  alertWithNotifications: function(lastCount) {
+    let newCount = this.notifications.length;
+
+    if (newCount && newCount != lastCount && this.showAlertNotification) {
+      try {
+        let message = 'You have ' + newCount + ' new notifications';
+
+        Main.notify('Github Notifications', message);
+      } catch (e) {
+        error("Cannot notify " + e)
+      }
+    }
   }
 });
 

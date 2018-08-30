@@ -1,10 +1,10 @@
 <schemalist gettext-domain="gnome-shell-extension-github-notifications">
 
   <schema id="org.gnome.shell.extensions.github.notifications" path="/org/gnome/shell/extensions/github-notifications/">
-  	<key name="handle" type="s">
-  		<default>''</default>
-  		<summary>Your github handle</summary>
-  	</key>
+    <key name="handle" type="s">
+      <default>''</default>
+      <summary>Your github handle</summary>
+    </key>
     <key name="token" type="s">
       <default>''</default>
       <summary>Your github token</summary>
@@ -22,6 +22,10 @@
       <default>60</default>
       <summary>The refresh interval in seconds</summary>
       <description>The refresh interval used by the extension. If this number is smaller than the header returned by github, it will be ignored and the header will take precedence. See https://developer.github.com/v3/activity/notifications/</description>
+    </key>
+    <key name="show-alert" type="b">
+      <default>false</default>
+      <summary>Show notifications alert</summary>
     </key>
   </schema>
 </schemalist>
