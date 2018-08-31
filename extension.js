@@ -233,7 +233,7 @@ const GithubNotifications = new Lang.Class({
   alertWithNotifications: function(lastCount) {
     let newCount = this.notifications.length;
 
-    if (newCount && newCount != lastCount && this.showAlertNotification) {
+    if (newCount && newCount > lastCount && this.showAlertNotification) {
       try {
         let message = 'You have ' + newCount + ' new notifications';
 
