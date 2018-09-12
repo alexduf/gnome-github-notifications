@@ -14,6 +14,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
 const Util = imports.misc.util;
+const MessageTray = imports.ui.messageTray;
 
 const GITHUB_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.github.notifications';
 const Settings = Convenience.getSettings(GITHUB_SETTINGS_SCHEMA);
@@ -26,6 +27,14 @@ function info(message) {
 function error(message) {
   global.log('[GITHUB NOTIFICATIONS EXTENSION][ERROR] ' + message);
 }
+
+function showBrowserUri() {
+  try {
+    Gtk.show_uri(null, 'https://github.com/notifications', Gtk.get_current_event_time());
+  } catch (e) {
+    error("Cannot open uri " + e)
+  }
+};
 
 const GithubNotifications = new Lang.Class({
   Name: 'GithubNotifications',
@@ -44,6 +53,7 @@ const GithubNotifications = new Lang.Class({
   retryIntervals: [60, 120, 240, 480, 960, 1920, 3600],
   hasLazilyInit: false,
   showAlertNotification: false,
+  _source: null,
 
   interval: function() {
     let i = this.refreshInterval
@@ -132,12 +142,13 @@ const GithubNotifications = new Lang.Class({
       let button = event.get_button();
 
       if (button == 1) {
-        Gtk.show_uri(null, 'https://github.com/notifications', Gtk.get_current_event_time());
+        showBrowserUri();
       } else if (button == 3) {
         Util.spawn(["gnome-shell-extension-prefs", "github.notifications@alexandre.dufournet.gmail.com"]);
       }
     });
   },
+
 
   initHttp: function() {
     this.authUri = new Soup.URI('https://api.github.com/notifications');
@@ -237,11 +248,43 @@ const GithubNotifications = new Lang.Class({
       try {
         let message = 'You have ' + newCount + ' new notifications';
 
-        Main.notify('Github Notifications', message);
+        this.notify('Github Notifications', message);
       } catch (e) {
         error("Cannot notify " + e)
       }
     }
+  },
+
+  notify: function(title, message) {
+    let notification;
+
+    this.addNotificationSource();
+
+    if (this._source && this._source.notifications.length == 0) {
+      notification = new MessageTray.Notification(this._source, title, message);
+
+      notification.setTransient(true);
+      notification.setResident(false);
+      notification.connect('activated', showBrowserUri); // Open on click
+    } else {
+      notification = this._source.notifications[0];
+      notification.update(title, message, { clear: true });
+    }
+
+    this._source.notify(notification);
+  },
+
+  addNotificationSource: function() {
+    if (this._source) {
+      return;
+    }
+
+    this._source = new MessageTray.SystemNotificationSource();
+    this._source.connect(
+      'destroy',
+      Lang.bind(this, function() { this._source = null; })
+    );
+    Main.messageTray.add(this._source);
   }
 });
 
