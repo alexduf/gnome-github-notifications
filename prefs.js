@@ -38,7 +38,7 @@ function buildPrefsWidget() {
   box.pack_start(hideCount, false, false, 5);
 
   const showParticipating = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 5});
-  const showParticipatingLabel = new Gtk.Label ({label : "Only show notification if you're participating (mention, review asked...)"});
+  const showParticipatingLabel = new Gtk.Label ({label : "Only count notifications if you're participating (mention, review asked...)"});
   showParticipating.pack_start(showParticipatingLabel, false, false, 5);
   const showParticipatingSwitch = new Gtk.Switch();
   settings.bind('show-participating-only', showParticipatingSwitch, 'state', Gio.SettingsBindFlags.DEFAULT);
