@@ -37,6 +37,14 @@ function buildPrefsWidget() {
   hideCount.pack_end(hideCountSwitch, false, false, 5);
   box.pack_start(hideCount, false, false, 5);
 
+  const showParticipating = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 5});
+  const showParticipatingLabel = new Gtk.Label ({label : "Only show notification if you're participating (mention, review asked...)"});
+  showParticipating.pack_start(showParticipatingLabel, false, false, 5);
+  const showParticipatingSwitch = new Gtk.Switch();
+  settings.bind('show-participating-only', showParticipatingSwitch, 'state', Gio.SettingsBindFlags.DEFAULT);
+  showParticipating.pack_end(showParticipatingSwitch, false, false, 5);
+  box.pack_start(showParticipating, false, false, 5);
+
   const refreshInterval = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 5});
   const refreshIntervalLabel = new Gtk.Label ({label : "Refresh interval (in seconds)*"});
   refreshInterval.pack_start(refreshIntervalLabel, false, false, 5);

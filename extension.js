@@ -30,7 +30,8 @@ function error(message) {
 
 function showBrowserUri() {
   try {
-    Gtk.show_uri(null, 'https://github.com/notifications', Gtk.get_current_event_time());
+    let url = this.showParticipatingOnly ? 'https://github.com/notifications/participating' : 'https://github.com/notifications';
+    Gtk.show_uri(null, url, Gtk.get_current_event_time());
   } catch (e) {
     error("Cannot open uri " + e)
   }
@@ -53,6 +54,7 @@ const GithubNotifications = new Lang.Class({
   retryIntervals: [60, 120, 240, 480, 960, 1920, 3600],
   hasLazilyInit: false,
   showAlertNotification: false,
+  showParticipatingOnly: false,
   _source: null,
 
   interval: function() {
@@ -100,6 +102,7 @@ const GithubNotifications = new Lang.Class({
     this.hideCount = Settings.get_boolean('hide-notification-count');
     this.refreshInterval = Settings.get_int('refresh-interval');
     this.showAlertNotification = Settings.get_boolean('show-alert');
+    this.showParticipatingOnly = Settings.get_boolean('show-participating-only');
     this.checkVisibility();
   },
 
@@ -151,7 +154,8 @@ const GithubNotifications = new Lang.Class({
 
 
   initHttp: function() {
-    this.authUri = new Soup.URI('https://api.github.com/notifications');
+    let url = this.showParticipatingOnly ? 'https://api.github.com/notifications?participating=1' : 'https://api.github.com/notifications';
+    this.authUri = new Soup.URI(url);
     this.authUri.set_user(this.handle);
     this.authUri.set_password(this.token);
 
