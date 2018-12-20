@@ -28,15 +28,6 @@ function error(message) {
   global.log('[GITHUB NOTIFICATIONS EXTENSION][ERROR] ' + message);
 }
 
-function showBrowserUri() {
-  try {
-    let url = this.showParticipatingOnly ? 'https://github.com/notifications/participating' : 'https://github.com/notifications';
-    Gtk.show_uri(null, url, Gtk.get_current_event_time());
-  } catch (e) {
-    error("Cannot open uri " + e)
-  }
-};
-
 const GithubNotifications = new Lang.Class({
   Name: 'GithubNotifications',
 
@@ -141,20 +132,36 @@ const GithubNotifications = new Lang.Class({
 
     this.box.add_actor(icon);
     this.box.add_actor(this.label);
-    this.box.connect('button-press-event', function(actor, event) {
+    this.box.connect('button-press-event', Lang.bind(this, function(actor, event) {
       let button = event.get_button();
 
       if (button == 1) {
-        showBrowserUri();
+        this.showBrowserUri();
       } else if (button == 3) {
         Util.spawn(["gnome-shell-extension-prefs", "github.notifications@alexandre.dufournet.gmail.com"]);
       }
-    });
+    }));
   },
 
 
+  showBrowserUri: function () {
+    try {
+      let url = 'https://github.com/notifications';
+      if (this.showParticipatingOnly) {
+        url = 'https://github.com/notifications/participating';
+      }
+      
+      Gtk.show_uri(null, url, Gtk.get_current_event_time());
+    } catch (e) {
+      error("Cannot open uri " + e)
+    }
+  },
+
   initHttp: function() {
-    let url = this.showParticipatingOnly ? 'https://api.github.com/notifications?participating=1' : 'https://api.github.com/notifications';
+    let url = 'https://api.github.com/notifications';
+    if (this.showParticipatingOnly) {
+      url = 'https://api.github.com/notifications?participating=1';
+    }
     this.authUri = new Soup.URI(url);
     this.authUri.set_user(this.handle);
     this.authUri.set_password(this.token);
