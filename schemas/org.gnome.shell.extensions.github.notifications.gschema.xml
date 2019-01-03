@@ -27,5 +27,9 @@
       <default>false</default>
       <summary>Show notifications alert</summary>
     </key>
+    <key name="show-participating-only" type="b">
+      <default>false</default>
+      <summary>Only show participating notification</summary>
+    </key>
   </schema>
 </schemalist>
