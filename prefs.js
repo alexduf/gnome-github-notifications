@@ -13,6 +13,8 @@ const TOKEN_EXPLAINER = 'To get your token, please visit <a href="https://github
             ' - Select the "Notifications" scope\n' +
             ' - Click on "Generate Token"\n' +
             ' - Copy and paste the token in the above field\n\n' +
+            'Only Github Enterprise users need to change the "Github Hostname"\n' +
+            'It should not include "http[s]://" or path params\n\n' +
             '* This refresh interval will be ignored if smaller than github\'s policy.\n' +
             'See <a href="https://developer.github.com/v3/activity/notifications/">https://developer.github.com/v3/activity/notifications</a>';
 
@@ -77,6 +79,14 @@ function buildPrefsWidget() {
   settings.bind('token', tokenEntry, 'text', Gio.SettingsBindFlags.DEFAULT);
   tokenBox.pack_end(tokenEntry, true, true, 5);
   box.pack_start(tokenBox, false, false, 5);
+
+  const urlBox = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 5});
+  const urlLabel = new Gtk.Label ({label : "Github Hostname"});
+  urlBox.pack_start(urlLabel, false, false, 5);
+  const urlEntry = new Gtk.Entry();
+  settings.bind('url', urlEntry, 'text', Gio.SettingsBindFlags.DEFAULT);
+  urlBox.pack_end(urlEntry, true, true, 5);
+  box.pack_start(urlBox, false, false, 5);
 
   const explainerLabel = new Gtk.Label({label : TOKEN_EXPLAINER, selectable: true, 'use-markup': true});
   box.pack_end(explainerLabel, false, false, 5);
