@@ -150,7 +150,7 @@ const GithubNotifications = new Lang.Class({
       if (this.showParticipatingOnly) {
         url = 'https://github.com/notifications/participating';
       }
-      
+
       Gtk.show_uri(null, url, Gtk.get_current_event_time());
     } catch (e) {
       error("Cannot open uri " + e)
@@ -276,7 +276,7 @@ const GithubNotifications = new Lang.Class({
 
       notification.setTransient(true);
       notification.setResident(false);
-      notification.connect('activated', showBrowserUri); // Open on click
+      notification.connect('activated', this.showBrowserUri.bind(this)); // Open on click
     } else {
       notification = this._source.notifications[0];
       notification.update(title, message, { clear: true });
