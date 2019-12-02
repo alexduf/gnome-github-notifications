@@ -80,13 +80,13 @@ function buildPrefsWidget() {
   tokenBox.pack_end(tokenEntry, true, true, 5);
   box.pack_start(tokenBox, false, false, 5);
 
-  const urlBox = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 5});
-  const urlLabel = new Gtk.Label ({label : "Github Hostname"});
-  urlBox.pack_start(urlLabel, false, false, 5);
-  const urlEntry = new Gtk.Entry();
-  settings.bind('url', urlEntry, 'text', Gio.SettingsBindFlags.DEFAULT);
-  urlBox.pack_end(urlEntry, true, true, 5);
-  box.pack_start(urlBox, false, false, 5);
+  const domainBox = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 5});
+  const domainLabel = new Gtk.Label ({label : "Github Hostname"});
+  domainBox.pack_start(domainLabel, false, false, 5);
+  const domainEntry = new Gtk.Entry();
+  settings.bind('domain', domainEntry, 'text', Gio.SettingsBindFlags.DEFAULT);
+  domainBox.pack_end(domainEntry, true, true, 5);
+  box.pack_start(domainBox, false, false, 5);
 
   const explainerLabel = new Gtk.Label({label : TOKEN_EXPLAINER, selectable: true, 'use-markup': true});
   box.pack_end(explainerLabel, false, false, 5);

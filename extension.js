@@ -87,7 +87,7 @@ const GithubNotifications = new Lang.Class({
   },
 
   reloadSettings: function() {
-    this.domain = Settings.get_string('url');
+    this.domain = Settings.get_string('domain');
     this.token = Settings.get_string('token');
     this.handle = Settings.get_string('handle');
     this.hideWidget = Settings.get_boolean('hide-widget');
@@ -302,7 +302,7 @@ const GithubNotifications = new Lang.Class({
 
 function init() {
   githubNotifications = new GithubNotifications();
-  global.githubNotifications = githubNotifications; // for debug purposes only
+  //global.githubNotifications = githubNotifications; // for debug purposes only
 }
 
 function enable() {
