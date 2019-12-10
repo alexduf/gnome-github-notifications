@@ -87,6 +87,7 @@ const GithubNotifications = new Lang.Class({
   },
 
   reloadSettings: function() {
+    this.domain = Settings.get_string('domain');
     this.token = Settings.get_string('token');
     this.handle = Settings.get_string('handle');
     this.hideWidget = Settings.get_boolean('hide-widget');
@@ -146,9 +147,9 @@ const GithubNotifications = new Lang.Class({
 
   showBrowserUri: function () {
     try {
-      let url = 'https://github.com/notifications';
+      let url = 'https://' + this.domain + '/notifications';
       if (this.showParticipatingOnly) {
-        url = 'https://github.com/notifications/participating';
+        url = 'https://' + this.domain + '/notifications/participating';
       }
 
       Gtk.show_uri(null, url, Gtk.get_current_event_time());
@@ -158,9 +159,9 @@ const GithubNotifications = new Lang.Class({
   },
 
   initHttp: function() {
-    let url = 'https://api.github.com/notifications';
+    let url = 'https://api.' + this.domain + '/notifications';
     if (this.showParticipatingOnly) {
-      url = 'https://api.github.com/notifications?participating=1';
+      url = 'https://api.' + this.domain + '/notifications?participating=1';
     }
     this.authUri = new Soup.URI(url);
     this.authUri.set_user(this.handle);
@@ -173,7 +174,7 @@ const GithubNotifications = new Lang.Class({
       this.httpSession.user_agent = 'gnome-shell-extension github notification via libsoup';
 
       this.authManager = new Soup.AuthManager();
-      this.auth = new Soup.AuthBasic({host: 'api.github.com', realm: 'Github Api'});
+      this.auth = new Soup.AuthBasic({host: 'api.' + this.domain, realm: 'Github Api'});
 
       this.authManager.use_auth(this.authUri, this.auth);
       Soup.Session.prototype.add_feature.call(this.httpSession, this.authManager);

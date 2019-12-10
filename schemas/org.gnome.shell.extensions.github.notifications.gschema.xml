@@ -5,6 +5,11 @@
       <default>''</default>
       <summary>Your github handle</summary>
     </key>
+    <key name="domain" type="s">
+      <default>'github.com'</default>
+      <summary>Your github domain</summary>
+      <description>Change this variable only if you are using GitHub Enterprise</description>
+    </key>
     <key name="token" type="s">
       <default>''</default>
       <summary>Your github token</summary>
