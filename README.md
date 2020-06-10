@@ -10,6 +10,7 @@ Don't forget to click on the configuration icon and follow the instructions ther
 ### The manual way
 
 ```
+mkdir -p ~/.local/share/gnome-shell/extensions/
 cd ~/.local/share/gnome-shell/extensions/
 git clone git@github.com:alexduf/gnome-github-notifications.git github.notifications@alexandre.dufournet.gmail.com
 ```
