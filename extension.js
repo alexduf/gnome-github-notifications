@@ -1,7 +1,6 @@
 
 const St = imports.gi.St;
 const Main = imports.ui.main;
-const Tweener = imports.ui.tweener;
 const Gio = imports.gi.Gio;
 const Gtk = imports.gi.Gtk;
 const GObject = imports.gi.GObject;
