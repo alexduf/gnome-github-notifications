@@ -91,6 +91,9 @@ function buildPrefsWidget() {
   const explainerLabel = new Gtk.Label({label : TOKEN_EXPLAINER, selectable: true, 'use-markup': true});
   box.append(explainerLabel);
 
+  if (box.show_all) {
+    box.show_all();
+  }
   return box;
 }
 
