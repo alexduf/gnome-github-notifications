@@ -25,71 +25,71 @@ function buildPrefsWidget() {
 
   const hideWidgetBox = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 5});
   const hideWidgetLabel = new Gtk.Label({label : "Hide widget when there are no notifications"});
-  hideWidgetBox.append(hideWidgetLabel);
+  hideWidgetBox.prepend(hideWidgetLabel);
   const hideWidgetSwitch = new Gtk.Switch();
   settings.bind('hide-widget', hideWidgetSwitch, 'state', Gio.SettingsBindFlags.DEFAULT);
-  hideWidgetBox.prepend(hideWidgetSwitch);
-  box.append(hideWidgetBox);
+  hideWidgetBox.append(hideWidgetSwitch);
+  box.prepend(hideWidgetBox);
 
   const hideCount = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 5});
   const hideCountLabel = new Gtk.Label({label : "Hide notification count"});
-  hideCount.append(hideCountLabel);
+  hideCount.prepend(hideCountLabel);
   const hideCountSwitch = new Gtk.Switch();
   settings.bind('hide-notification-count', hideCountSwitch, 'state', Gio.SettingsBindFlags.DEFAULT);
-  hideCount.prepend(hideCountSwitch);
-  box.append(hideCount);
+  hideCount.append(hideCountSwitch);
+  box.prepend(hideCount);
 
   const showParticipating = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 5});
   const showParticipatingLabel = new Gtk.Label({label : "Only count notifications if you're participating (mention, review asked...)"});
-  showParticipating.append(showParticipatingLabel);
+  showParticipating.prepend(showParticipatingLabel);
   const showParticipatingSwitch = new Gtk.Switch();
   settings.bind('show-participating-only', showParticipatingSwitch, 'state', Gio.SettingsBindFlags.DEFAULT);
-  showParticipating.prepend(showParticipatingSwitch);
-  box.append(showParticipating);
+  showParticipating.append(showParticipatingSwitch);
+  box.prepend(showParticipating);
 
   const refreshInterval = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 5});
   const refreshIntervalLabel = new Gtk.Label({label : "Refresh interval (in seconds)*"});
-  refreshInterval.append(refreshIntervalLabel);
+  refreshInterval.prepend(refreshIntervalLabel);
   const refreshIntervalSpinButton = Gtk.SpinButton.new_with_range (60, 86400, 1);
   settings.bind('refresh-interval', refreshIntervalSpinButton, 'value', Gio.SettingsBindFlags.DEFAULT);
-  refreshInterval.prepend(refreshIntervalSpinButton);
-  box.append(refreshInterval);
+  refreshInterval.append(refreshIntervalSpinButton);
+  box.prepend(refreshInterval);
 
   // Show Alert
   const showAlert = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 5});
   const showAlertLabel = new Gtk.Label({label : "Show notifications alert"});
-  showAlert.append(showAlertLabel);
+  showAlert.prepend(showAlertLabel);
   const showAlertSwitch = new Gtk.Switch();
   settings.bind('show-alert', showAlertSwitch, 'state', Gio.SettingsBindFlags.DEFAULT);
-  showAlert.prepend(showAlertSwitch);
-  box.append(showAlert);
+  showAlert.append(showAlertSwitch);
+  box.prepend(showAlert);
 
   const handleBox = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 5});
   const handleLabel = new Gtk.Label({label : "Github handle"});
-  handleBox.append(handleLabel);
+  handleBox.prepend(handleLabel);
   const handleEntry = new Gtk.Entry();
   settings.bind('handle', handleEntry, 'text', Gio.SettingsBindFlags.DEFAULT);
-  handleBox.prepend(handleEntry);
-  box.append(handleBox);
+  handleBox.append(handleEntry);
+  box.prepend(handleBox);
 
   const tokenBox = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 5});
   const tokenLabel = new Gtk.Label({label : "Github Token"});
-  tokenBox.append(tokenLabel);
+  tokenBox.prepend(tokenLabel);
   const tokenEntry = new Gtk.Entry();
   settings.bind('token', tokenEntry, 'text', Gio.SettingsBindFlags.DEFAULT);
-  tokenBox.prepend(tokenEntry);
-  box.append(tokenBox);
+  tokenBox.append(tokenEntry);
+  box.prepend(tokenBox);
 
   const domainBox = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 5});
   const domainLabel = new Gtk.Label({label : "Github Hostname"});
-  domainBox.append(domainLabel);
+  domainBox.prepend(domainLabel);
   const domainEntry = new Gtk.Entry();
   settings.bind('domain', domainEntry, 'text', Gio.SettingsBindFlags.DEFAULT);
-  domainBox.prepend(domainEntry);
-  box.append(domainBox);
+  domainBox.append(domainEntry);
+  box.prepend(domainBox);
 
   const explainerLabel = new Gtk.Label({label : TOKEN_EXPLAINER, selectable: true, 'use-markup': true});
-  box.prepend(explainerLabel);
+  box.append(explainerLabel);
 
   return box;
 }
