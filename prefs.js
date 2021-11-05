@@ -7,10 +7,7 @@ const Convenience = Me.imports.convenience;
 
 const GITHUB_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.github.notifications';
 
-const TOKEN_EXPLAINER = 'To get your token, please visit <a href="https://github.com/settings/tokens">https://github.com/settings/tokens</a>\n' +
-            ' - Select "Generate new token"\n' +
-            ' - Pick any name you fancy (Gnome desktop notifications)\n' +
-            ' - Select the "Notifications" scope\n' +
+const TOKEN_EXPLAINER = 'To get your token, please visit <a href="https://github.com/settings/tokens/new?scopes=notifications&amp;description=Gnome%20desktop%20notifications">https://github.com/settings/tokens</a>\n' +
             ' - Click on "Generate Token"\n' +
             ' - Copy and paste the token in the above field\n\n' +
             'Only Github Enterprise users need to change the "Github Hostname"\n' +
