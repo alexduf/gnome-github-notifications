@@ -27,35 +27,37 @@ function error(message) {
   global.log('[GITHUB NOTIFICATIONS EXTENSION][ERROR] ' + message);
 }
 
-const GithubNotifications = new Lang.Class({
-  Name: 'GithubNotifications',
+class GithubNotifications
+{
+  constructor()
+  {
+    this.token = '';
+    this.handle = '';
+    this.hideWidget = false;
+    this.hideCount = false;
+    this.refreshInterval = 60;
+    this.githubInterval = 60;
+    this.timeout = null;
+    this.httpSession = null;
+    this.notifications = [];
+    this.lastModified = null;
+    this.retryAttempts = 0;
+    this.retryIntervals = [60, 120, 240, 480, 960, 1920, 3600];
+    this.hasLazilyInit = false;
+    this.showAlertNotification = false;
+    this.showParticipatingOnly = false;
+    this._source = null;
+  }
 
-  token: '',
-  handle: '',
-  hideWidget: false,
-  hideCount: false,
-  refreshInterval: 60,
-  githubInterval: 60,
-  timeout: null,
-  httpSession: null,
-  notifications: [],
-  lastModified: null,
-  retryAttempts: 0,
-  retryIntervals: [60, 120, 240, 480, 960, 1920, 3600],
-  hasLazilyInit: false,
-  showAlertNotification: false,
-  showParticipatingOnly: false,
-  _source: null,
-
-  interval: function() {
+  interval() {
     let i = this.refreshInterval
     if (this.retryAttempts > 0) {
       i = this.retryIntervals[this.retryAttempts] || 3600;
     }
     return Math.max(i, this.githubInterval);
-  },
+  }
 
-  lazyInit: function() {
+  lazyInit() {
     this.hasLazilyInit = true;
     this.reloadSettings();
     this.initHttp();
@@ -66,22 +68,22 @@ const GithubNotifications = new Lang.Class({
       this.planFetch(5, false);
     }));
     this.initUI();
-  },
+  }
 
-  start: function() {
+  start() {
     if (!this.hasLazilyInit) {
       this.lazyInit();
     }
     this.fetchNotifications();
     Main.panel._rightBox.insert_child_at_index(this.box, 0);
-  },
+  }
 
-  stop: function() {
+  stop() {
     this.stopLoop();
     Main.panel._rightBox.remove_child(this.box);
-  },
+  }
 
-  reloadSettings: function() {
+  reloadSettings() {
     this.domain = Settings.get_string('domain');
     this.token = Settings.get_string('token');
     this.handle = Settings.get_string('handle');
@@ -91,25 +93,25 @@ const GithubNotifications = new Lang.Class({
     this.showAlertNotification = Settings.get_boolean('show-alert');
     this.showParticipatingOnly = Settings.get_boolean('show-participating-only');
     this.checkVisibility();
-  },
+  }
 
-  checkVisibility: function() {
+  checkVisibility() {
     if (this.box) {
       this.box.visible = !this.hideWidget || this.notifications.length != 0;
     }
     if (this.label) {
       this.label.visible = !this.hideCount;
     }
-  },
+  }
 
-  stopLoop: function() {
+  stopLoop() {
     if (this.timeout) {
       Mainloop.source_remove(this.timeout);
       this.timeout = null;
     }
-  },
+  }
 
-  initUI: function() {
+  initUI() {
     this.box = new St.BoxLayout({
       style_class: 'panel-button',
       reactive: true,
@@ -137,10 +139,10 @@ const GithubNotifications = new Lang.Class({
         Util.spawn(["gnome-shell-extension-prefs", "github.notifications@alexandre.dufournet.gmail.com"]);
       }
     }));
-  },
+  }
 
 
-  showBrowserUri: function () {
+  showBrowserUri() {
     try {
       let url = 'https://' + this.domain + '/notifications';
       if (this.showParticipatingOnly) {
@@ -151,9 +153,9 @@ const GithubNotifications = new Lang.Class({
     } catch (e) {
       error("Cannot open uri " + e)
     }
-  },
+  }
 
-  initHttp: function() {
+  initHttp() {
     let url = 'https://api.' + this.domain + '/notifications';
     if (this.showParticipatingOnly) {
       url = 'https://api.' + this.domain + '/notifications?participating=1';
@@ -174,9 +176,9 @@ const GithubNotifications = new Lang.Class({
       this.authManager.use_auth(this.authUri, this.auth);
       Soup.Session.prototype.add_feature.call(this.httpSession, this.authManager);
     }
-  },
+  }
 
-  planFetch: function(delay, retry) {
+  planFetch(delay, retry) {
     if (retry) {
       this.retryAttempts++;
     } else {
@@ -187,9 +189,9 @@ const GithubNotifications = new Lang.Class({
       this.fetchNotifications();
       return false;
     }));
-  },
+  }
 
-  fetchNotifications: function() {
+  fetchNotifications() {
     let message = new Soup.Message({method: 'GET', uri: this.authUri});
     if (this.lastModified) {
       // github's API is currently broken: marking a notification as read won't modify the "last-modified" header
@@ -237,18 +239,18 @@ const GithubNotifications = new Lang.Class({
           return;
         }
     }));
-  },
+  }
 
-  updateNotifications: function(data) {
+  updateNotifications(data) {
     let lastNotificationsCount = this.notifications.length;
 
     this.notifications = data;
     this.label && this.label.set_text('' + data.length);
     this.checkVisibility();
     this.alertWithNotifications(lastNotificationsCount);
-  },
+  }
 
-  alertWithNotifications: function(lastCount) {
+  alertWithNotifications(lastCount) {
     let newCount = this.notifications.length;
 
     if (newCount && newCount > lastCount && this.showAlertNotification) {
@@ -260,9 +262,9 @@ const GithubNotifications = new Lang.Class({
         error("Cannot notify " + e)
       }
     }
-  },
+  }
 
-  notify: function(title, message) {
+  notify(title, message) {
     let notification;
 
     this.addNotificationSource();
@@ -279,9 +281,9 @@ const GithubNotifications = new Lang.Class({
     }
 
     this._source.notify(notification);
-  },
+  }
 
-  addNotificationSource: function() {
+  addNotificationSource() {
     if (this._source) {
       return;
     }
@@ -293,7 +295,7 @@ const GithubNotifications = new Lang.Class({
     );
     Main.messageTray.add(this._source);
   }
-});
+}
 
 function init() {
   githubNotifications = new GithubNotifications();
