@@ -55,10 +55,6 @@ const GithubNotifications = new Lang.Class({
     return Math.max(i, this.githubInterval);
   },
 
-  _init : function() {
-    this.parent();
-  },
-
   lazyInit: function() {
     this.hasLazilyInit = true;
     this.reloadSettings();
