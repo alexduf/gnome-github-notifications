@@ -1,11 +1,7 @@
 
-const St = imports.gi.St;
+const {St, Gio, Gtk, Soup, Clutter} = imports.gi.St;
 const Main = imports.ui.main;
-const Gio = imports.gi.Gio;
-const Gtk = imports.gi.Gtk;
 const Mainloop = imports.mainloop;
-const Soup = imports.gi.Soup;
-const Clutter = imports.gi.Clutter;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
@@ -27,8 +23,7 @@ function error(message) {
 
 class GithubNotifications
 {
-  constructor()
-  {
+  constructor() {
     this.token = '';
     this.handle = '';
     this.hideWidget = false;
