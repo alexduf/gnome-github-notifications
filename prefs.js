@@ -1,27 +1,31 @@
-const { Gtk, Gio } = imports.gi.Gtk;
+const { Gtk, Gio } = imports.gi;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
 
-const _settings = Convenience.getSettings(GITHUB_SETTINGS_SCHEMA);
-
 const GITHUB_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.github.notifications';
 
-const TOKEN_EXPLAINER = 'To get your token, please visit <a href="https://github.com/settings/tokens/new?scopes=notifications&amp;description=Gnome%20desktop%20notifications">https://github.com/settings/tokens</a>\n' +
-    ' - Click on "Generate Token"\n' +
-    ' - Copy and paste the token in the above field\n\n' +
-    'Only Github Enterprise users need to change the "Github Hostname"\n' +
-    'It should not include "http[s]://" or path params\n\n' +
-    '* This refresh interval will be ignored if smaller than github\'s policy.\n' +
-    'See <a href="https://developer.github.com/v3/activity/notifications/">https://developer.github.com/v3/activity/notifications</a>';
+const _settings = Convenience.getSettings(GITHUB_SETTINGS_SCHEMA);
 
-function makeLabeledOptionBox(label) {
+const TOKEN_EXPLAINER = `To get your token, please visit <a href="https://github.com/settings/tokens/new?scopes=notifications&amp;description=Gnome%20desktop%20notifications">https://github.com/settings/tokens</a>
+ - Click on "Generate Token"
+ - Copy and paste the token in the above field
+
+Only Github Enterprise users need to change the "Github Hostname"
+It should not include "http[s]://" or path params.
+
+* This refresh interval will be ignored if smaller than Github's policy.
+See <a href="https://developer.github.com/v3/activity/notifications/">https://developer.github.com/v3/activity/notifications</a>`;
+
+function makeLabeledOptionBox(labelText) {
     const box = new Gtk.Box({
         orientation: Gtk.Orientation.HORIZONTAL,
-        spacing: 5,
+        spacing: 10,
     });
-    const label = new Gtk.Label({ label });
+    const label = new Gtk.Label({
+        label: labelText
+    });
 
     box.append(label);
     return box;
@@ -54,7 +58,7 @@ function makeLabeledEntryOptionBox(label, boundSettingName) {
 function makeLabeledSpinButtonOptionBox(label, boundSettingName, min, max, step) {
     const box = makeLabeledOptionBox(label);
 
-    const spinButton = new Gtk.SpinButton.new_with_range(min, max, step);
+    const spinButton = Gtk.SpinButton.new_with_range(min, max, step);
     bindSettingToGtkWidget(boundSettingName, spinButton, 'value');
 
     box.append(spinButton);
@@ -64,7 +68,11 @@ function makeLabeledSpinButtonOptionBox(label, boundSettingName, min, max, step)
 function buildPrefsWidget() {
     const mainBox = new Gtk.Box({
         orientation: Gtk.Orientation.VERTICAL,
-        spacing: 5
+        'margin-top': 20,
+        'margin-bottom': 20,
+        'margin-start': 20,
+        'margin-end': 20,
+        spacing: 10,
     });
 
     const innerWidgets = [
