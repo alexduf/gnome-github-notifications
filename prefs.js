@@ -62,62 +62,44 @@ function makeLabeledSpinButtonOptionBox(label, boundSettingName, min, max, step)
 }
 
 function buildPrefsWidget() {
-    const box = new Gtk.Box({
+    const mainBox = new Gtk.Box({
         orientation: Gtk.Orientation.VERTICAL,
         spacing: 5
     });
 
-    const domainBox = makeLabeledEntryOptionBox('Github Hostname', 'domain');
-    box.append(domainBox);
+    const innerWidgets = [
+        makeLabeledEntryOptionBox('Github Hostname', 'domain'),
+        makeLabeledEntryOptionBox('Github Token', 'token'),
+        makeLabeledEntryOptionBox('Github Handle', 'handle'),
+        makeLabeledSwitchOptionBox('Show notifications alert', 'show-alert'),
+        makeLabeledSpinButtonOptionBox(
+            'Refresh interval (in seconds)*',
+            'refresh-interval',
+            60,
+            86400,
+            1,
+        ),
+        makeLabeledSwitchOptionBox(
+            'Only count notifications if you\'re participating (mention, review asked...)',
+            'show-participating-only',
+        ),
+        makeLabeledSwitchOptionBox('Hide notification count', 'hide-notification-count'),
+        makeLabeledSwitchOptionBox(
+            'Hide widget when there are no notifications',
+            'hide-widget'
+        ),
+        new Gtk.Label({
+            label: TOKEN_EXPLAINER,
+            selectable: true,
+            'use-markup': true
+        }),
+    ];
 
-    const tokenBox = makeLabeledEntryOptionBox('Github Token', 'token');
-    box.append(tokenBox);
-
-    const handleBox = makeLabeledEntryOptionBox('Github Handle', 'handle');
-    box.append(handleBox);
-
-    // Show Alert
-    const showAlert = makeLabeledSwitchOptionBox(
-        'Show notifications alert',
-        'show-alert',
-    );
-    box.append(showAlert);
-
-    const refreshInterval = makeLabeledSpinButtonOptionBox(
-        'Refresh interval (in seconds)*',
-        'refresh-interval',
-        60,
-        86400,
-        1,
-    );
-    box.append(refreshInterval);
-
-    const showParticipating = makeLabeledSwitchOptionBox(
-        'Only count notifications if you\'re participating (mention, review asked...)',
-        'show-participating-only',
-    );
-    box.append(showParticipating);
-
-    const hideCount = makeLabeledSwitchOptionBox(
-        'Hide notification count',
-        'hide-notification-count',
-    );
-    box.append(hideCount);
-
-    const hideWidget = makeLabeledSwitchOptionBox(
-        'Hide widget when there are no notifications',
-        'hide-widget',
-    );
-    box.append(hideWidget);
-
-    const explainerLabel = new Gtk.Label({ label: TOKEN_EXPLAINER, selectable: true, 'use-markup': true });
-    box.append(explainerLabel);
-
-    // TODO: Remove this. No longer needed as of GTK4.
-    if (box.show_all) {
-        box.show_all();
+    for (const w of innerWidgets) {
+        mainBox.append(w);
     }
-    return box;
+
+    return mainBox;
 }
 
 function init() {
