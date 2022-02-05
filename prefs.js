@@ -62,25 +62,26 @@ function makeLabeledSpinButtonOptionBox(label, boundSettingName, min, max, step)
 }
 
 function buildPrefsWidget() {
-    const box = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 5 });
+    const box = new Gtk.Box({
+        orientation: Gtk.Orientation.VERTICAL,
+        spacing: 5
+    });
 
-    const hideWidgetBox = makeLabeledSwitchOptionBox(
-        'Hide widget when there are no notifications',
-        'hide-widget',
-    );
-    box.prepend(hideWidgetBox);
+    const domainBox = makeLabeledEntryOptionBox('Github Hostname', 'domain');
+    box.append(domainBox);
 
-    const hideCountBox = makeLabeledSwitchOptionBox(
-        'Hide notification count',
-        'hide-notification-count',
-    );
-    box.prepend(hideCountBox);
+    const tokenBox = makeLabeledEntryOptionBox('Github Token', 'token');
+    box.append(tokenBox);
 
-    const showParticipating = makeLabeledOptionBox(
-        'Only count notifications if you\'re participating (mention, review asked...)',
-        'show-participating-only',
+    const handleBox = makeLabeledEntryOptionBox('Github Handle', 'handle');
+    box.append(handleBox);
+
+    // Show Alert
+    const showAlert = makeLabeledSwitchOptionBox(
+        'Show notifications alert',
+        'show-alert',
     );
-    box.prepend(showParticipating);
+    box.append(showAlert);
 
     const refreshInterval = makeLabeledSpinButtonOptionBox(
         'Refresh interval (in seconds)*',
@@ -89,23 +90,25 @@ function buildPrefsWidget() {
         86400,
         1,
     );
-    box.prepend(refreshInterval);
+    box.append(refreshInterval);
 
-    // Show Alert
-    const showAlert = makeLabeledOptionBox(
-        'Show notifications alert',
-        'show-alert',
+    const showParticipating = makeLabeledSwitchOptionBox(
+        'Only count notifications if you\'re participating (mention, review asked...)',
+        'show-participating-only',
     );
-    box.prepend(showAlert);
+    box.append(showParticipating);
 
-    const handleBox = makeLabeledEntryOptionBox('Github Handle', 'handle');
-    box.prepend(handleBox);
+    const hideCount = makeLabeledSwitchOptionBox(
+        'Hide notification count',
+        'hide-notification-count',
+    );
+    box.append(hideCount);
 
-    const tokenBox = makeLabeledOptionBox('Github Token', 'token');
-    box.prepend(tokenBox);
-
-    const domainBox = makeLabeledOptionBox('Github Hostname', 'domain');
-    box.prepend(domainBox);
+    const hideWidget = makeLabeledSwitchOptionBox(
+        'Hide widget when there are no notifications',
+        'hide-widget',
+    );
+    box.append(hideWidget);
 
     const explainerLabel = new Gtk.Label({ label: TOKEN_EXPLAINER, selectable: true, 'use-markup': true });
     box.append(explainerLabel);
