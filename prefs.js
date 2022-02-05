@@ -27,13 +27,27 @@ function makeLabeledOptionBox(label) {
     return box;
 }
 
+function bindSettingToGtkWidget(boundSettingName, widget, property) {
+    _settings.bind(boundSettingName, widget, property, Gio.SettingsBindFlags.DEFAULT);
+}
+
 function makeLabeledSwitchOptionBox(label, boundSettingName) {
     const box = makeLabeledOptionBox(label);
 
     const switch_ = new Gtk.Switch();
-    _settings.bind(boundSettingName, switch_, 'state', Gio.SettingsBindFlags.DEFAULT);
+    bindSettingToGtkWidget(boundSettingName, switch_, 'state');
 
     box.append(switch_);
+    return box;
+}
+
+function makeLabeledEntryOptionBox(label, boundSettingName) {
+    const box = makeLabeledOptionBox(label);
+
+    const entry = new Gtk.Entry();
+    bindSettingToGtkWidget(boundSettingName, entry, 'text');
+
+    box.append(entry);
     return box;
 }
 
@@ -71,22 +85,13 @@ function buildPrefsWidget() {
     );
     box.prepend(showAlert);
 
-    const handleBox = makeLabeledOptionBox('Github handle');
-    const handleEntry = new Gtk.Entry();
-    settings.bind('handle', handleEntry, 'text', Gio.SettingsBindFlags.DEFAULT);
-    handleBox.append(handleEntry);
+    const handleBox = makeLabeledEntryOptionBox('Github Handle', 'handle');
     box.prepend(handleBox);
 
-    const tokenBox = makeLabeledOptionBox('Github Token');
-    const tokenEntry = new Gtk.Entry();
-    settings.bind('token', tokenEntry, 'text', Gio.SettingsBindFlags.DEFAULT);
-    tokenBox.append(tokenEntry);
+    const tokenBox = makeLabeledOptionBox('Github Token', 'token');
     box.prepend(tokenBox);
 
-    const domainBox = makeLabeledOptionBox('Github Hostname');
-    const domainEntry = new Gtk.Entry();
-    settings.bind('domain', domainEntry, 'text', Gio.SettingsBindFlags.DEFAULT);
-    domainBox.append(domainEntry);
+    const domainBox = makeLabeledOptionBox('Github Hostname', 'domain');
     box.prepend(domainBox);
 
     const explainerLabel = new Gtk.Label({ label: TOKEN_EXPLAINER, selectable: true, 'use-markup': true });
