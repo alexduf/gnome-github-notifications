@@ -122,8 +122,10 @@ const GithubNotifications = new Lang.Class({
     });
     this.label = new St.Label({
       text: '' + this.notifications.length,
-      style_class: 'system-status-icon',
-      y_align: Clutter.ActorAlign.CENTER
+      style_class: 'notifications-label',
+      y_align: Clutter.ActorAlign.CENTER,
+      x_expand: true,
+      y_expand: true,
     });
 
     this.checkVisibility();

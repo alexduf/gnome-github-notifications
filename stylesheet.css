@@ -1,9 +1,10 @@
-
 .github-background-symbolic {
-	/*-gtk-icon-source: url("github.svg");*/
-	/*-gtk-icon-source: -gtk-recolor(url("github.svg"));*/
 	background-image: url("github.svg");
-	height: 16px;
-	width: 16px;
+	height: .6em;
+	width: .6em;
+	padding-left: .3em;
 }
 
+.notifications-label {
+	padding: .1em .4em 0 .4em;
+}
