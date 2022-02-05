@@ -51,6 +51,16 @@ function makeLabeledEntryOptionBox(label, boundSettingName) {
     return box;
 }
 
+function makeLabeledSpinButtonOptionBox(label, boundSettingName, min, max, step) {
+    const box = makeLabeledOptionBox(label);
+
+    const spinButton = new Gtk.SpinButton.new_with_range(min, max, step);
+    bindSettingToGtkWidget(boundSettingName, spinButton, 'value');
+
+    box.append(spinButton);
+    return box;
+}
+
 function buildPrefsWidget() {
     const box = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 5 });
 
@@ -72,10 +82,13 @@ function buildPrefsWidget() {
     );
     box.prepend(showParticipating);
 
-    const refreshInterval = makeLabeledOptionBox('Refresh interval (in seconds)*');
-    const refreshIntervalSpinButton = Gtk.SpinButton.new_with_range(60, 86400, 1);
-    settings.bind('refresh-interval', refreshIntervalSpinButton, 'value', Gio.SettingsBindFlags.DEFAULT);
-    refreshInterval.append(refreshIntervalSpinButton);
+    const refreshInterval = makeLabeledSpinButtonOptionBox(
+        'Refresh interval (in seconds)*',
+        'refresh-interval',
+        60,
+        86400,
+        1,
+    );
     box.prepend(refreshInterval);
 
     // Show Alert
@@ -97,6 +110,7 @@ function buildPrefsWidget() {
     const explainerLabel = new Gtk.Label({ label: TOKEN_EXPLAINER, selectable: true, 'use-markup': true });
     box.append(explainerLabel);
 
+    // TODO: Remove this. No longer needed as of GTK4.
     if (box.show_all) {
         box.show_all();
     }
