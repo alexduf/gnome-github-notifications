@@ -54,12 +54,12 @@ class GithubNotifications
     this.hasLazilyInit = true;
     this.reloadSettings();
     this.initHttp();
-    Settings.connect('changed', Lang.bind(this, function() {
+    Settings.connect('changed', () => {
       this.reloadSettings();
       this.initHttp();
       this.stopLoop();
       this.planFetch(5, false);
-    }));
+    });
     this.initUI();
   }
 
@@ -123,7 +123,7 @@ class GithubNotifications
 
     this.box.add_actor(icon);
     this.box.add_actor(this.label);
-    this.box.connect('button-press-event', Lang.bind(this, function(actor, event) {
+    this.box.connect('button-press-event', (_, event) => {
       let button = event.get_button();
 
       if (button == 1) {
@@ -131,7 +131,7 @@ class GithubNotifications
       } else if (button == 3) {
         Util.spawn(["gnome-shell-extension-prefs", "github.notifications@alexandre.dufournet.gmail.com"]);
       }
-    }));
+    });
   }
 
 
@@ -178,10 +178,10 @@ class GithubNotifications
       this.retryAttempts = 0;
     }
     this.stopLoop();
-    this.timeout = Mainloop.timeout_add_seconds(delay, Lang.bind(this, function() {
+    this.timeout = Mainloop.timeout_add_seconds(delay, () => {
       this.fetchNotifications();
       return false;
-    }));
+    });
   }
 
   fetchNotifications() {
@@ -192,7 +192,7 @@ class GithubNotifications
       //message.request_headers.append('If-Modified-Since', this.lastModified);
     }
 
-    this.httpSession.queue_message(message, Lang.bind(this, function(session, response) {
+    this.httpSession.queue_message(message, (_, response) => {
         try {
           if (response.status_code == 200 || response.status_code == 304) {
             if (response.response_headers.get('Last-Modified')) {
@@ -231,7 +231,7 @@ class GithubNotifications
           error('HTTP exception:' + e);
           return;
         }
-    }));
+    });
   }
 
   updateNotifications(data) {
@@ -282,10 +282,9 @@ class GithubNotifications
     }
 
     this._source = new MessageTray.SystemNotificationSource();
-    this._source.connect(
-      'destroy',
-      Lang.bind(this, function() { this._source = null; })
-    );
+    this._source.connect('destroy', () => {
+      this._source = null;
+    });
     Main.messageTray.add(this._source);
   }
 }
