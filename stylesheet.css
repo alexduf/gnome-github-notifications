@@ -1,10 +1,4 @@
-.github-background-symbolic {
-	background-image: url("github.svg");
-	height: .6em;
-	width: .6em;
-	padding-left: .3em;
-}
-
-.notifications-label {
-	padding: .1em .4em 0 .4em;
+.notifications-length {
+	padding-left: 0;
+	padding-top: 4px;
 }

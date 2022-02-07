@@ -113,7 +113,7 @@ class GithubNotifications
     });
     this.label = new St.Label({
       text: '' + this.notifications.length,
-      style_class: 'notifications-label',
+      style_class: 'system-status-icon notifications-length',
       y_align: Clutter.ActorAlign.CENTER,
       x_expand: true,
       y_expand: true,
@@ -121,10 +121,14 @@ class GithubNotifications
 
     this.checkVisibility();
 
-    let icon = new St.Icon({ style_class: 'system-status-icon github-background-symbolic' });
+    let icon = new St.Icon({
+      style_class: 'system-status-icon'
+    });
+    icon.gicon = Gio.icon_new_for_string(`${Me.path}/github.svg`);
 
     this.box.add_actor(icon);
     this.box.add_actor(this.label);
+
     this.box.connect('button-press-event', (_, event) => {
       let button = event.get_button();
 
