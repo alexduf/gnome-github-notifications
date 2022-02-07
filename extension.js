@@ -127,7 +127,7 @@ class GithubNotifications
       if (button == 1) {
         this.showBrowserUri();
       } else if (button == 3) {
-        Util.spawn(["gnome-shell-extension-prefs", "github.notifications@alexandre.dufournet.gmail.com"]);
+        ExtensionUtils.openPrefs()
       }
     });
   }
