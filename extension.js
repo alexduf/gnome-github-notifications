@@ -9,9 +9,6 @@ const Convenience = Me.imports.convenience;
 const Util = imports.misc.util;
 const MessageTray = imports.ui.messageTray;
 
-const GITHUB_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.github.notifications';
-const Settings = Convenience.getSettings(GITHUB_SETTINGS_SCHEMA);
-
 let githubNotifications;
 
 function info(message) {
@@ -40,6 +37,7 @@ class GithubNotifications
     this.showAlertNotification = false;
     this.showParticipatingOnly = false;
     this._source = null;
+    this.settings = null;
   }
 
   interval() {
@@ -54,7 +52,7 @@ class GithubNotifications
     this.hasLazilyInit = true;
     this.reloadSettings();
     this.initHttp();
-    Settings.connect('changed', () => {
+    this.settings.connect('changed', () => {
       this.reloadSettings();
       this.initHttp();
       this.stopLoop();
@@ -64,6 +62,7 @@ class GithubNotifications
   }
 
   start() {
+    this.settings = Convenience.getSettings('org.gnome.shell.extensions.github.notifications');
     if (!this.hasLazilyInit) {
       this.lazyInit();
     }
@@ -77,14 +76,14 @@ class GithubNotifications
   }
 
   reloadSettings() {
-    this.domain = Settings.get_string('domain');
-    this.token = Settings.get_string('token');
-    this.handle = Settings.get_string('handle');
-    this.hideWidget = Settings.get_boolean('hide-widget');
-    this.hideCount = Settings.get_boolean('hide-notification-count');
-    this.refreshInterval = Settings.get_int('refresh-interval');
-    this.showAlertNotification = Settings.get_boolean('show-alert');
-    this.showParticipatingOnly = Settings.get_boolean('show-participating-only');
+    this.domain = this.settings.get_string('domain');
+    this.token = this.settings.get_string('token');
+    this.handle = this.settings.get_string('handle');
+    this.hideWidget = this.settings.get_boolean('hide-widget');
+    this.hideCount = this.settings.get_boolean('hide-notification-count');
+    this.refreshInterval = this.settings.get_int('refresh-interval');
+    this.showAlertNotification = this.settings.get_boolean('show-alert');
+    this.showParticipatingOnly = this.settings.get_boolean('show-participating-only');
     this.checkVisibility();
   }
 
@@ -290,14 +289,14 @@ class GithubNotifications
 }
 
 function init() {
-  githubNotifications = new GithubNotifications();
-  //global.githubNotifications = githubNotifications; // for debug purposes only
 }
 
 function enable() {
+  githubNotifications = new GithubNotifications();
   githubNotifications.start();
 }
 
 function disable() {
   githubNotifications.stop();
+  githubNotifications = null;
 }
