@@ -3,7 +3,6 @@ const Gio = imports.gi.Gio;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
-const Convenience = Me.imports.convenience;
 
 const GITHUB_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.github.notifications';
 
@@ -16,7 +15,7 @@ const TOKEN_EXPLAINER = 'To get your token, please visit <a href="https://github
             'See <a href="https://developer.github.com/v3/activity/notifications/">https://developer.github.com/v3/activity/notifications</a>';
 
 function buildPrefsWidget() {
-  const settings = Convenience.getSettings(GITHUB_SETTINGS_SCHEMA);
+  const settings = ExtensionUtils.getSettings(GITHUB_SETTINGS_SCHEMA);
 
   const box = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, spacing: 5});
 

@@ -5,7 +5,6 @@ const Mainloop = imports.mainloop;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
-const Convenience = Me.imports.convenience;
 const Util = imports.misc.util;
 const MessageTray = imports.ui.messageTray;
 
@@ -62,7 +61,7 @@ class GithubNotifications
   }
 
   start() {
-    this.settings = Convenience.getSettings('org.gnome.shell.extensions.github.notifications');
+    this.settings = ExtensionUtils.getSettings('org.gnome.shell.extensions.github.notifications');
     if (!this.hasLazilyInit) {
       this.lazyInit();
     }
