@@ -1,96 +1,112 @@
-const Gtk = imports.gi.Gtk;
-const Gio = imports.gi.Gio;
+const { Gtk, Gio } = imports.gi;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 
 const GITHUB_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.github.notifications';
 
-const TOKEN_EXPLAINER = 'To get your token, please visit <a href="https://github.com/settings/tokens/new?scopes=notifications&amp;description=Gnome%20desktop%20notifications">https://github.com/settings/tokens</a>\n' +
-            ' - Click on "Generate Token"\n' +
-            ' - Copy and paste the token in the above field\n\n' +
-            'Only Github Enterprise users need to change the "Github Hostname"\n' +
-            'It should not include "http[s]://" or path params\n\n' +
-            '* This refresh interval will be ignored if smaller than github\'s policy.\n' +
-            'See <a href="https://developer.github.com/v3/activity/notifications/">https://developer.github.com/v3/activity/notifications</a>';
+const _settings = ExtensionUtils.getSettings(GITHUB_SETTINGS_SCHEMA);
+
+const TOKEN_EXPLAINER = `To get your token, please visit <a href="https://github.com/settings/tokens/new?scopes=notifications&amp;description=Gnome%20desktop%20notifications">https://github.com/settings/tokens</a>
+ - Click on "Generate Token"
+ - Copy and paste the token in the above field
+
+Only Github Enterprise users need to change the "Github Hostname"
+It should not include "http[s]://" or path params.
+
+* This refresh interval will be ignored if smaller than Github's policy.
+See <a href="https://developer.github.com/v3/activity/notifications/">https://developer.github.com/v3/activity/notifications</a>`;
+
+function makeLabeledOptionBox(labelText) {
+    const box = new Gtk.Box({
+        orientation: Gtk.Orientation.HORIZONTAL,
+        spacing: 10,
+    });
+    const label = new Gtk.Label({
+        label: labelText
+    });
+
+    box.append(label);
+    return box;
+}
+
+function bindSettingToGtkWidget(boundSettingName, widget, property) {
+    _settings.bind(boundSettingName, widget, property, Gio.SettingsBindFlags.DEFAULT);
+}
+
+function makeLabeledSwitchOptionBox(label, boundSettingName) {
+    const box = makeLabeledOptionBox(label);
+
+    const switch_ = new Gtk.Switch();
+    bindSettingToGtkWidget(boundSettingName, switch_, 'state');
+
+    box.append(switch_);
+    return box;
+}
+
+function makeLabeledEntryOptionBox(label, boundSettingName) {
+    const box = makeLabeledOptionBox(label);
+
+    const entry = new Gtk.Entry();
+    bindSettingToGtkWidget(boundSettingName, entry, 'text');
+
+    box.append(entry);
+    return box;
+}
+
+function makeLabeledSpinButtonOptionBox(label, boundSettingName, min, max, step) {
+    const box = makeLabeledOptionBox(label);
+
+    const spinButton = Gtk.SpinButton.new_with_range(min, max, step);
+    bindSettingToGtkWidget(boundSettingName, spinButton, 'value');
+
+    box.append(spinButton);
+    return box;
+}
 
 function buildPrefsWidget() {
-  const settings = ExtensionUtils.getSettings(GITHUB_SETTINGS_SCHEMA);
+    const mainBox = new Gtk.Box({
+        orientation: Gtk.Orientation.VERTICAL,
+        'margin-top': 20,
+        'margin-bottom': 20,
+        'margin-start': 20,
+        'margin-end': 20,
+        spacing: 10,
+    });
 
-  const box = new Gtk.Box({orientation: Gtk.Orientation.VERTICAL, spacing: 5});
+    const innerWidgets = [
+        makeLabeledEntryOptionBox('Github Hostname', 'domain'),
+        makeLabeledEntryOptionBox('Github Token', 'token'),
+        makeLabeledEntryOptionBox('Github Handle', 'handle'),
+        makeLabeledSwitchOptionBox('Show notifications alert', 'show-alert'),
+        makeLabeledSpinButtonOptionBox(
+            'Refresh interval (in seconds)*',
+            'refresh-interval',
+            60,
+            86400,
+            1,
+        ),
+        makeLabeledSwitchOptionBox(
+            'Only count notifications if you\'re participating (mention, review asked...)',
+            'show-participating-only',
+        ),
+        makeLabeledSwitchOptionBox('Hide notification count', 'hide-notification-count'),
+        makeLabeledSwitchOptionBox(
+            'Hide widget when there are no notifications',
+            'hide-widget'
+        ),
+        new Gtk.Label({
+            label: TOKEN_EXPLAINER,
+            selectable: true,
+            'use-markup': true
+        }),
+    ];
 
-  const hideWidgetBox = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 5});
-  const hideWidgetLabel = new Gtk.Label({label : "Hide widget when there are no notifications"});
-  hideWidgetBox.prepend(hideWidgetLabel);
-  const hideWidgetSwitch = new Gtk.Switch();
-  settings.bind('hide-widget', hideWidgetSwitch, 'state', Gio.SettingsBindFlags.DEFAULT);
-  hideWidgetBox.append(hideWidgetSwitch);
-  box.prepend(hideWidgetBox);
+    for (const w of innerWidgets) {
+        mainBox.append(w);
+    }
 
-  const hideCount = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 5});
-  const hideCountLabel = new Gtk.Label({label : "Hide notification count"});
-  hideCount.prepend(hideCountLabel);
-  const hideCountSwitch = new Gtk.Switch();
-  settings.bind('hide-notification-count', hideCountSwitch, 'state', Gio.SettingsBindFlags.DEFAULT);
-  hideCount.append(hideCountSwitch);
-  box.prepend(hideCount);
-
-  const showParticipating = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 5});
-  const showParticipatingLabel = new Gtk.Label({label : "Only count notifications if you're participating (mention, review asked...)"});
-  showParticipating.prepend(showParticipatingLabel);
-  const showParticipatingSwitch = new Gtk.Switch();
-  settings.bind('show-participating-only', showParticipatingSwitch, 'state', Gio.SettingsBindFlags.DEFAULT);
-  showParticipating.append(showParticipatingSwitch);
-  box.prepend(showParticipating);
-
-  const refreshInterval = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 5});
-  const refreshIntervalLabel = new Gtk.Label({label : "Refresh interval (in seconds)*"});
-  refreshInterval.prepend(refreshIntervalLabel);
-  const refreshIntervalSpinButton = Gtk.SpinButton.new_with_range (60, 86400, 1);
-  settings.bind('refresh-interval', refreshIntervalSpinButton, 'value', Gio.SettingsBindFlags.DEFAULT);
-  refreshInterval.append(refreshIntervalSpinButton);
-  box.prepend(refreshInterval);
-
-  // Show Alert
-  const showAlert = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 5});
-  const showAlertLabel = new Gtk.Label({label : "Show notifications alert"});
-  showAlert.prepend(showAlertLabel);
-  const showAlertSwitch = new Gtk.Switch();
-  settings.bind('show-alert', showAlertSwitch, 'state', Gio.SettingsBindFlags.DEFAULT);
-  showAlert.append(showAlertSwitch);
-  box.prepend(showAlert);
-
-  const handleBox = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 5});
-  const handleLabel = new Gtk.Label({label : "Github handle"});
-  handleBox.prepend(handleLabel);
-  const handleEntry = new Gtk.Entry();
-  settings.bind('handle', handleEntry, 'text', Gio.SettingsBindFlags.DEFAULT);
-  handleBox.append(handleEntry);
-  box.prepend(handleBox);
-
-  const tokenBox = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 5});
-  const tokenLabel = new Gtk.Label({label : "Github Token"});
-  tokenBox.prepend(tokenLabel);
-  const tokenEntry = new Gtk.Entry();
-  settings.bind('token', tokenEntry, 'text', Gio.SettingsBindFlags.DEFAULT);
-  tokenBox.append(tokenEntry);
-  box.prepend(tokenBox);
-
-  const domainBox = new Gtk.Box({orientation: Gtk.Orientation.HORIZONTAL, spacing: 5});
-  const domainLabel = new Gtk.Label({label : "Github Hostname"});
-  domainBox.prepend(domainLabel);
-  const domainEntry = new Gtk.Entry();
-  settings.bind('domain', domainEntry, 'text', Gio.SettingsBindFlags.DEFAULT);
-  domainBox.append(domainEntry);
-  box.prepend(domainBox);
-
-  const explainerLabel = new Gtk.Label({label : TOKEN_EXPLAINER, selectable: true, 'use-markup': true});
-  box.append(explainerLabel);
-
-  if (box.show_all) {
-    box.show_all();
-  }
-  return box;
+    return mainBox;
 }
 
 function init() {
