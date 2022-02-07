@@ -1,13 +1,7 @@
 
-const St = imports.gi.St;
+const {St, Gio, Gtk, Soup, Clutter} = imports.gi;
 const Main = imports.ui.main;
-const Gio = imports.gi.Gio;
-const Gtk = imports.gi.Gtk;
-const GObject = imports.gi.GObject;
-const Lang = imports.lang;
 const Mainloop = imports.mainloop;
-const Soup = imports.gi.Soup;
-const Clutter = imports.gi.Clutter;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
@@ -27,65 +21,62 @@ function error(message) {
   global.log('[GITHUB NOTIFICATIONS EXTENSION][ERROR] ' + message);
 }
 
-const GithubNotifications = new Lang.Class({
-  Name: 'GithubNotifications',
+class GithubNotifications
+{
+  constructor() {
+    this.token = '';
+    this.handle = '';
+    this.hideWidget = false;
+    this.hideCount = false;
+    this.refreshInterval = 60;
+    this.githubInterval = 60;
+    this.timeout = null;
+    this.httpSession = null;
+    this.notifications = [];
+    this.lastModified = null;
+    this.retryAttempts = 0;
+    this.retryIntervals = [60, 120, 240, 480, 960, 1920, 3600];
+    this.hasLazilyInit = false;
+    this.showAlertNotification = false;
+    this.showParticipatingOnly = false;
+    this._source = null;
+  }
 
-  token: '',
-  handle: '',
-  hideWidget: false,
-  hideCount: false,
-  refreshInterval: 60,
-  githubInterval: 60,
-  timeout: null,
-  httpSession: null,
-  notifications: [],
-  lastModified: null,
-  retryAttempts: 0,
-  retryIntervals: [60, 120, 240, 480, 960, 1920, 3600],
-  hasLazilyInit: false,
-  showAlertNotification: false,
-  showParticipatingOnly: false,
-  _source: null,
-
-  interval: function() {
+  interval() {
     let i = this.refreshInterval
     if (this.retryAttempts > 0) {
       i = this.retryIntervals[this.retryAttempts] || 3600;
     }
     return Math.max(i, this.githubInterval);
-  },
+  }
 
-  _init : function() {
-    this.parent();
-  },
-
-  lazyInit: function() {
+  lazyInit() {
     this.hasLazilyInit = true;
     this.reloadSettings();
     this.initHttp();
-    Settings.connect('changed', Lang.bind(this, function() {
+    Settings.connect('changed', () => {
       this.reloadSettings();
       this.initHttp();
       this.stopLoop();
       this.planFetch(5, false);
-    }));
+    });
     this.initUI();
-  },
+  }
 
-  start: function() {
+  start() {
     if (!this.hasLazilyInit) {
       this.lazyInit();
     }
     this.fetchNotifications();
     Main.panel._rightBox.insert_child_at_index(this.box, 0);
-  },
+  }
 
-  stop: function() {
+  stop() {
     this.stopLoop();
     Main.panel._rightBox.remove_child(this.box);
-  },
+  }
 
-  reloadSettings: function() {
+  reloadSettings() {
     this.domain = Settings.get_string('domain');
     this.token = Settings.get_string('token');
     this.handle = Settings.get_string('handle');
@@ -95,25 +86,25 @@ const GithubNotifications = new Lang.Class({
     this.showAlertNotification = Settings.get_boolean('show-alert');
     this.showParticipatingOnly = Settings.get_boolean('show-participating-only');
     this.checkVisibility();
-  },
+  }
 
-  checkVisibility: function() {
+  checkVisibility() {
     if (this.box) {
       this.box.visible = !this.hideWidget || this.notifications.length != 0;
     }
     if (this.label) {
       this.label.visible = !this.hideCount;
     }
-  },
+  }
 
-  stopLoop: function() {
+  stopLoop() {
     if (this.timeout) {
       Mainloop.source_remove(this.timeout);
       this.timeout = null;
     }
-  },
+  }
 
-  initUI: function() {
+  initUI() {
     this.box = new St.BoxLayout({
       style_class: 'panel-button',
       reactive: true,
@@ -134,7 +125,7 @@ const GithubNotifications = new Lang.Class({
 
     this.box.add_actor(icon);
     this.box.add_actor(this.label);
-    this.box.connect('button-press-event', Lang.bind(this, function(actor, event) {
+    this.box.connect('button-press-event', (_, event) => {
       let button = event.get_button();
 
       if (button == 1) {
@@ -142,11 +133,11 @@ const GithubNotifications = new Lang.Class({
       } else if (button == 3) {
         Util.spawn(["gnome-shell-extension-prefs", "github.notifications@alexandre.dufournet.gmail.com"]);
       }
-    }));
-  },
+    });
+  }
 
 
-  showBrowserUri: function () {
+  showBrowserUri() {
     try {
       let url = 'https://' + this.domain + '/notifications';
       if (this.showParticipatingOnly) {
@@ -157,9 +148,9 @@ const GithubNotifications = new Lang.Class({
     } catch (e) {
       error("Cannot open uri " + e)
     }
-  },
+  }
 
-  initHttp: function() {
+  initHttp() {
     let url = 'https://api.' + this.domain + '/notifications';
     if (this.showParticipatingOnly) {
       url = 'https://api.' + this.domain + '/notifications?participating=1';
@@ -180,22 +171,22 @@ const GithubNotifications = new Lang.Class({
       this.authManager.use_auth(this.authUri, this.auth);
       Soup.Session.prototype.add_feature.call(this.httpSession, this.authManager);
     }
-  },
+  }
 
-  planFetch: function(delay, retry) {
+  planFetch(delay, retry) {
     if (retry) {
       this.retryAttempts++;
     } else {
       this.retryAttempts = 0;
     }
     this.stopLoop();
-    this.timeout = Mainloop.timeout_add_seconds(delay, Lang.bind(this, function() {
+    this.timeout = Mainloop.timeout_add_seconds(delay, () => {
       this.fetchNotifications();
       return false;
-    }));
-  },
+    });
+  }
 
-  fetchNotifications: function() {
+  fetchNotifications() {
     let message = new Soup.Message({method: 'GET', uri: this.authUri});
     if (this.lastModified) {
       // github's API is currently broken: marking a notification as read won't modify the "last-modified" header
@@ -203,7 +194,7 @@ const GithubNotifications = new Lang.Class({
       //message.request_headers.append('If-Modified-Since', this.lastModified);
     }
 
-    this.httpSession.queue_message(message, Lang.bind(this, function(session, response) {
+    this.httpSession.queue_message(message, (_, response) => {
         try {
           if (response.status_code == 200 || response.status_code == 304) {
             if (response.response_headers.get('Last-Modified')) {
@@ -242,19 +233,19 @@ const GithubNotifications = new Lang.Class({
           error('HTTP exception:' + e);
           return;
         }
-    }));
-  },
+    });
+  }
 
-  updateNotifications: function(data) {
+  updateNotifications(data) {
     let lastNotificationsCount = this.notifications.length;
 
     this.notifications = data;
     this.label && this.label.set_text('' + data.length);
     this.checkVisibility();
     this.alertWithNotifications(lastNotificationsCount);
-  },
+  }
 
-  alertWithNotifications: function(lastCount) {
+  alertWithNotifications(lastCount) {
     let newCount = this.notifications.length;
 
     if (newCount && newCount > lastCount && this.showAlertNotification) {
@@ -266,9 +257,9 @@ const GithubNotifications = new Lang.Class({
         error("Cannot notify " + e)
       }
     }
-  },
+  }
 
-  notify: function(title, message) {
+  notify(title, message) {
     let notification;
 
     this.addNotificationSource();
@@ -285,21 +276,20 @@ const GithubNotifications = new Lang.Class({
     }
 
     this._source.notify(notification);
-  },
+  }
 
-  addNotificationSource: function() {
+  addNotificationSource() {
     if (this._source) {
       return;
     }
 
     this._source = new MessageTray.SystemNotificationSource();
-    this._source.connect(
-      'destroy',
-      Lang.bind(this, function() { this._source = null; })
-    );
+    this._source.connect('destroy', () => {
+      this._source = null;
+    });
     Main.messageTray.add(this._source);
   }
-});
+}
 
 function init() {
   githubNotifications = new GithubNotifications();
