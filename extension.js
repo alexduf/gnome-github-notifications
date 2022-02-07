@@ -21,9 +21,8 @@ function error(message) {
     global.log('[GITHUB NOTIFICATIONS EXTENSION][ERROR] ' + message);
 }
 
-class GithubNotifications
-{
-  constructor() {
+class GithubNotifications {
+    constructor() {
         this.token = '';
         this.handle = '';
         this.hideWidget = false;
@@ -40,17 +39,17 @@ class GithubNotifications
         this.showAlertNotification = false;
         this.showParticipatingOnly = false;
         this._source = null;
-  }
+    }
 
-  interval() {
+    interval() {
         let i = this.refreshInterval
         if (this.retryAttempts > 0) {
             i = this.retryIntervals[this.retryAttempts] || 3600;
         }
         return Math.max(i, this.githubInterval);
-  }
+    }
 
-  lazyInit() {
+    lazyInit() {
         this.hasLazilyInit = true;
         this.reloadSettings();
         this.initHttp();
@@ -61,22 +60,22 @@ class GithubNotifications
             this.planFetch(5, false);
         });
         this.initUI();
-  }
+    }
 
-  start() {
+    start() {
         if (!this.hasLazilyInit) {
             this.lazyInit();
         }
         this.fetchNotifications();
         Main.panel._rightBox.insert_child_at_index(this.box, 0);
-  }
+    }
 
-  stop() {
+    stop() {
         this.stopLoop();
         Main.panel._rightBox.remove_child(this.box);
-  }
+    }
 
-  reloadSettings() {
+    reloadSettings() {
         this.domain = Settings.get_string('domain');
         this.token = Settings.get_string('token');
         this.handle = Settings.get_string('handle');
@@ -86,25 +85,25 @@ class GithubNotifications
         this.showAlertNotification = Settings.get_boolean('show-alert');
         this.showParticipatingOnly = Settings.get_boolean('show-participating-only');
         this.checkVisibility();
-  }
+    }
 
-  checkVisibility() {
+    checkVisibility() {
         if (this.box) {
             this.box.visible = !this.hideWidget || this.notifications.length != 0;
         }
         if (this.label) {
             this.label.visible = !this.hideCount;
         }
-  }
+    }
 
-  stopLoop() {
+    stopLoop() {
         if (this.timeout) {
             Mainloop.source_remove(this.timeout);
             this.timeout = null;
         }
-  }
+    }
 
-  initUI() {
+    initUI() {
         this.box = new St.BoxLayout({
             style_class: 'panel-button',
             reactive: true,
@@ -138,10 +137,10 @@ class GithubNotifications
                 Util.spawn(["gnome-shell-extension-prefs", "github.notifications@alexandre.dufournet.gmail.com"]);
             }
         });
-  }
+    }
 
 
-  showBrowserUri() {
+    showBrowserUri() {
         try {
             let url = 'https://' + this.domain + '/notifications';
             if (this.showParticipatingOnly) {
@@ -152,9 +151,9 @@ class GithubNotifications
         } catch (e) {
             error("Cannot open uri " + e)
         }
-  }
+    }
 
-  initHttp() {
+    initHttp() {
         let url = 'https://api.' + this.domain + '/notifications';
         if (this.showParticipatingOnly) {
             url = 'https://api.' + this.domain + '/notifications?participating=1';
@@ -175,9 +174,9 @@ class GithubNotifications
             this.authManager.use_auth(this.authUri, this.auth);
             Soup.Session.prototype.add_feature.call(this.httpSession, this.authManager);
         }
-  }
+    }
 
-  planFetch(delay, retry) {
+    planFetch(delay, retry) {
         if (retry) {
             this.retryAttempts++;
         } else {
@@ -188,9 +187,9 @@ class GithubNotifications
             this.fetchNotifications();
             return false;
         });
-  }
+    }
 
-  fetchNotifications() {
+    fetchNotifications() {
         let message = new Soup.Message({ method: 'GET', uri: this.authUri });
         if (this.lastModified) {
             // github's API is currently broken: marking a notification as read won't modify the "last-modified" header
@@ -238,18 +237,18 @@ class GithubNotifications
                 return;
             }
         });
-  }
+    }
 
-  updateNotifications(data) {
+    updateNotifications(data) {
         let lastNotificationsCount = this.notifications.length;
 
         this.notifications = data;
         this.label && this.label.set_text('' + data.length);
         this.checkVisibility();
         this.alertWithNotifications(lastNotificationsCount);
-  }
+    }
 
-  alertWithNotifications(lastCount) {
+    alertWithNotifications(lastCount) {
         let newCount = this.notifications.length;
 
         if (newCount && newCount > lastCount && this.showAlertNotification) {
@@ -261,9 +260,9 @@ class GithubNotifications
                 error("Cannot notify " + e)
             }
         }
-  }
+    }
 
-  notify(title, message) {
+    notify(title, message) {
         let notification;
 
         this.addNotificationSource();
@@ -280,9 +279,9 @@ class GithubNotifications
         }
 
         this._source.notify(notification);
-  }
+    }
 
-  addNotificationSource() {
+    addNotificationSource() {
         if (this._source) {
             return;
         }
@@ -292,7 +291,7 @@ class GithubNotifications
             this._source = null;
         });
         Main.messageTray.add(this._source);
-  }
+    }
 }
 
 function init() {
