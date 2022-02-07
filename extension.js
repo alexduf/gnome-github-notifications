@@ -1,5 +1,5 @@
 
-const {St, Gio, Gtk, Soup, Clutter} = imports.gi.St;
+const {St, Gio, Gtk, Soup, Clutter} = imports.gi;
 const Main = imports.ui.main;
 const Mainloop = imports.mainloop;
 
