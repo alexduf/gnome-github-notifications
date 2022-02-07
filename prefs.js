@@ -2,11 +2,10 @@ const { Gtk, Gio } = imports.gi;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
-const Convenience = Me.imports.convenience;
 
 const GITHUB_SETTINGS_SCHEMA = 'org.gnome.shell.extensions.github.notifications';
 
-const _settings = Convenience.getSettings(GITHUB_SETTINGS_SCHEMA);
+const _settings = ExtensionUtils.getSettings(GITHUB_SETTINGS_SCHEMA);
 
 const TOKEN_EXPLAINER = `To get your token, please visit <a href="https://github.com/settings/tokens/new?scopes=notifications&amp;description=Gnome%20desktop%20notifications">https://github.com/settings/tokens</a>
  - Click on "Generate Token"
