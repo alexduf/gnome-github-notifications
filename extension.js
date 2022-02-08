@@ -112,7 +112,6 @@ class GithubNotifications {
             text: '' + this.notifications.length,
             style_class: 'system-status-icon notifications-length',
             y_align: Clutter.ActorAlign.CENTER,
-            x_expand: true,
             y_expand: true,
         });
 
