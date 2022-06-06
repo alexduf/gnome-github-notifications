@@ -9,6 +9,7 @@ const _settings = ExtensionUtils.getSettings(GITHUB_SETTINGS_SCHEMA);
 
 const TOKEN_EXPLAINER = `To get your token, please visit <a href="https://github.com/settings/tokens/new?scopes=notifications&amp;description=Gnome%20desktop%20notifications">https://github.com/settings/tokens</a>
  - Click on "Generate Token"
+ - In "Select scopes", choose only "notifications"
  - Copy and paste the token in the above field
 
 Only Github Enterprise users need to change the "Github Hostname"
