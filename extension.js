@@ -36,6 +36,7 @@ class GithubNotifications {
         this.showParticipatingOnly = false;
         this._source = null;
         this.settings = null;
+        this.icon = null;
     }
 
     interval() {
@@ -117,12 +118,12 @@ class GithubNotifications {
 
         this.checkVisibility();
 
-        let icon = new St.Icon({
+        this.icon = new St.Icon({
             style_class: 'system-status-icon'
         });
-        icon.gicon = Gio.icon_new_for_string(`${Me.path}/github.svg`);
+        this.icon.gicon = Gio.icon_new_for_string(`${Me.path}/github.svg`);
 
-        this.box.add_actor(icon);
+        this.box.add_actor(this.icon);
         this.box.add_actor(this.label);
 
         this.box.connect('button-press-event', (_, event) => {
@@ -265,9 +266,9 @@ class GithubNotifications {
         this.addNotificationSource();
 
         if (this._source && this._source.notifications.length == 0) {
-            notification = new MessageTray.Notification(this._source, title, message);
+            notification = new MessageTray.Notification(this._source, title, message, { gicon: this.icon.gicon });
 
-            notification.setTransient(true);
+            notification.setTransient(false);
             notification.setResident(false);
             notification.connect('activated', this.showBrowserUri.bind(this)); // Open on click
         } else {
@@ -275,7 +276,7 @@ class GithubNotifications {
             notification.update(title, message, { clear: true });
         }
 
-        this._source.notify(notification);
+        this._source.showNotification(notification);
     }
 
     addNotificationSource() {
