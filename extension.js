@@ -267,7 +267,7 @@ class GithubNotifications {
         if (this._source && this._source.notifications.length == 0) {
             notification = new MessageTray.Notification(this._source, title, message);
 
-            notification.setTransient(true);
+            notification.setTransient(false);
             notification.setResident(false);
             notification.connect('activated', this.showBrowserUri.bind(this)); // Open on click
         } else {
