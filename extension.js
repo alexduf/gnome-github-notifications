@@ -153,7 +153,11 @@ class GithubNotifications {
         url = 'https://' + this.domain + '/notifications/participating';
       }
 
-      Gtk.show_uri(null, url, Gtk.get_current_event_time());
+      if (PACKAGE_VERSION >= 43) {
+        Gtk.show_uri(null, url, Gtk.EventController.get_current_event_time());
+      } else {
+        Gtk.show_uri(null, url, Gtk.get_current_event_time());
+      }
     } catch (e) {
       error('Cannot open uri ' + e);
     }
