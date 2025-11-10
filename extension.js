@@ -1,4 +1,4 @@
-const { St, Gio, Gtk, Soup, Clutter } = imports.gi;
+const { St, Gio, GLib, Gtk, Soup, Clutter } = imports.gi;
 const Main = imports.ui.main;
 const Mainloop = imports.mainloop;
 
@@ -151,25 +151,42 @@ class GithubNotifications {
     }
 
     initHttp() {
-        let url = 'https://api.' + this.domain + '/notifications';
+        let user = this.handle;
+        let password = this.token;
+        let scheme = 'https';
+        let host = 'api.' + this.domain;
+        let path = '/notifications';
         if (this.showParticipatingOnly) {
-            url = 'https://api.' + this.domain + '/notifications?participating=1';
+            path = '/notifications?participating=1';
         }
-        this.authUri = new Soup.URI(url);
-        this.authUri.set_user(this.handle);
-        this.authUri.set_password(this.token);
+
+        if (imports.gi.versions.Soup == '3.0') {
+            this.authUri = GLib.Uri.build_with_user(Soup.HTTP_URI_FLAGS, scheme, user, password,
+                null, host, -1, path, null, null);
+        } else {
+            this.authUri = new Soup.URI(scheme + "://" + host + path);
+            this.authUri.set_user(this.handle);
+            this.authUri.set_password(this.token);
+        }
 
         if (this.httpSession) {
             this.httpSession.abort();
         } else {
             this.httpSession = new Soup.Session();
-            this.httpSession.user_agent = 'gnome-shell-extension github notification via libsoup';
 
-            this.authManager = new Soup.AuthManager();
-            this.auth = new Soup.AuthBasic({ host: 'api.' + this.domain, realm: 'Github Api' });
+            if (imports.gi.versions.Soup == '3.0') {
+                this.httpSession.set_user_agent('gnome-shell-extension github notification via libsoup');
+                this.authManager = this.httpSession.get_feature(Soup.AuthManager);
+                this.auth = new Soup.AuthBasic({ authority: 'api.' + this.domain, realm: 'Github Api' });
+                this.authManager.use_auth(this.authUri, this.auth);
+            } else {
+                this.httpSession.user_agent = 'gnome-shell-extension github notification via libsoup';
+                this.authManager = new Soup.AuthManager();
+                this.auth = new Soup.AuthBasic({ host: 'api.' + this.domain, realm: 'Github Api' });
 
-            this.authManager.use_auth(this.authUri, this.auth);
-            Soup.Session.prototype.add_feature.call(this.httpSession, this.authManager);
+                this.authManager.use_auth(this.authUri, this.auth);
+                Soup.Session.prototype.add_feature.call(this.httpSession, this.authManager);
+            }
         }
     }
 
@@ -194,46 +211,96 @@ class GithubNotifications {
             //message.request_headers.append('If-Modified-Since', this.lastModified);
         }
 
-        this.httpSession.queue_message(message, (_, response) => {
-            try {
-                if (response.status_code == 200 || response.status_code == 304) {
-                    if (response.response_headers.get('Last-Modified')) {
-                        this.lastModified = response.response_headers.get('Last-Modified');
+        if (imports.gi.versions.Soup == '3.0') {
+            this.httpSession.send_and_read_async(message, GLib.PRIORITY_DEFAULT, null,
+                (_, result) => {
+                try {
+                    let bytes = this.httpSession.send_and_read_finish(result);
+                    let decoder = new TextDecoder('utf-8');
+                    let body = decoder.decode(bytes.get_data());
+                    let response = this.httpSession.get_async_result_message(result);
+                    if (response.get_status() == 200 || response.get_status() == 304) {
+                        let rsp_headers = response.get_response_headers();
+                        if (rsp_headers.get_one('Last-Modified')) {
+                            this.lastModified = rsp_headers.get_one('Last-Modified');
+                        }
+                        if (rsp_headers.get_one('X-Poll-Interval')) {
+                            this.githubInterval = rsp_headers.get_one('X-Poll-Interval');
+                        }
+                        this.planFetch(this.interval(), false);
+                        if (response.get_status() == 200) {
+                            let data = JSON.parse(body);
+                            this.updateNotifications(data);
+                        }
+                        return;
                     }
-                    if (response.response_headers.get('X-Poll-Interval')) {
-                        this.githubInterval = response.response_headers.get('X-Poll-Interval');
+                    if (response.get_status() == 401) {
+                        error('Unauthorized. Check your github handle and token in the settings');
+                        this.planFetch(this.interval(), true);
+                        this.label.set_text('!');
+                        return;
                     }
-                    this.planFetch(this.interval(), false);
-                    if (response.status_code == 200) {
-                        let data = JSON.parse(response.response_body.data);
-                        this.updateNotifications(data);
+                    if (!body && response.get_status() > 400) {
+                        error('HTTP error:' + response.get_status());
+                        this.planFetch(this.interval(), true);
+                        return;
                     }
-                    return;
-                }
-                if (response.status_code == 401) {
-                    error('Unauthorized. Check your github handle and token in the settings');
+                    // if we reach this point, none of the cases above have been triggered
+                    // which likely means there was an error locally or on the network
+                    // therefore we should try again in a while
+                    error('HTTP error:' + response.get_status());
+                    error('response error: ' + JSON.stringify(response));
+                    error('body error: ' + JSON.stringify(body));
                     this.planFetch(this.interval(), true);
                     this.label.set_text('!');
                     return;
-                }
-                if (!response.response_body.data && response.status_code > 400) {
-                    error('HTTP error:' + response.status_code);
-                    this.planFetch(this.interval(), true);
+                } catch (e) {
+                    error('HTTP exception:' + e);
                     return;
                 }
-                // if we reach this point, none of the cases above have been triggered
-                // which likely means there was an error locally or on the network
-                // therefore we should try again in a while
-                error('HTTP error:' + response.status_code);
-                error('response error: ' + JSON.stringify(response));
-                this.planFetch(this.interval(), true);
-                this.label.set_text('!');
-                return;
-            } catch (e) {
-                error('HTTP exception:' + e);
-                return;
-            }
-        });
+            });
+        } else {
+            this.httpSession.queue_message(message, (_, response) => {
+                try {
+                    if (response.status_code == 200 || response.status_code == 304) {
+                        if (response.response_headers.get('Last-Modified')) {
+                            this.lastModified = response.response_headers.get('Last-Modified');
+                        }
+                        if (response.response_headers.get('X-Poll-Interval')) {
+                            this.githubInterval = response.response_headers.get('X-Poll-Interval');
+                        }
+                        this.planFetch(this.interval(), false);
+                        if (response.status_code == 200) {
+                            let data = JSON.parse(response.response_body.data);
+                            this.updateNotifications(data);
+                        }
+                        return;
+                    }
+                    if (response.status_code == 401) {
+                        error('Unauthorized. Check your github handle and token in the settings');
+                        this.planFetch(this.interval(), true);
+                        this.label.set_text('!');
+                        return;
+                    }
+                    if (!response.response_body.data && response.status_code > 400) {
+                        error('HTTP error:' + response.status_code);
+                        this.planFetch(this.interval(), true);
+                        return;
+                    }
+                    // if we reach this point, none of the cases above have been triggered
+                    // which likely means there was an error locally or on the network
+                    // therefore we should try again in a while
+                    error('HTTP error:' + response.status_code);
+                    error('response error: ' + JSON.stringify(response));
+                    this.planFetch(this.interval(), true);
+                    this.label.set_text('!');
+                    return;
+                } catch (e) {
+                    error('HTTP exception:' + e);
+                    return;
+                }
+            });
+        }
     }
 
     updateNotifications(data) {
